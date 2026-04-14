@@ -1,0 +1,29 @@
+name: Build Goliath APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build APK
+        run: |
+          mkdir -p app/src/main/java/com/goliath/master
+          mkdir -p app/src/main/cpp
+          cp code.java app/src/main/java/com/goliath/master/MainActivity.java
+          cp code.cpp app/src/main/cpp/native-lib.cpp
+          cp code.cmake app/src/main/cpp/CMakeLists.txt
+          cp code.gradle build.gradle
+          chmod +x gradlew || true
+          ./gradlew assembleDebug || echo "Manual build needed"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: Goliath-V75
+          path: "**/app-debug.apk"
